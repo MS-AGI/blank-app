@@ -2,6 +2,39 @@ import streamlit as st
 import datetime
 import pickle
 import os
+from passlib.hash import bcrypt
+
+# Define hashed users dictionary (you can load from JSON too)
+users = {
+    "Master": "$2b$12$0PGn2wEQCovEc5Hxw.pveOqe7XFzT.J02zzZBIn5bQ/2lV9uP14eq"
+    # Add more users as needed
+}
+
+# Session-based login state
+if "auth" not in st.session_state:
+    st.session_state.auth = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+def login():
+    st.title("🔐 Secure Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username in users and bcrypt.verify(password, users[username]):
+            st.session_state.auth = True
+            st.session_state.username = username
+            st.success("✅ Login successful!")
+            st.rerun()
+        else:
+            st.error("❌ Invalid username or password")
+
+# Lock the app unless authenticated
+if not st.session_state.auth:
+    login()
+    st.stop()
+
 
 DATA_FILE = 'progress.pkl'
 
